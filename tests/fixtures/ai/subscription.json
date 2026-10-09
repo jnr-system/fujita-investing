@@ -1,0 +1,17 @@
+{
+ "kind": "free_item",
+ "genre": "daily",
+ "product": "初回無料 定期便",
+ "organizer": "テスト株式会社",
+ "start_at": null,
+ "deadline_at": "2026-10-20T23:59:00+09:00",
+ "conditions": "対象商品を購入してレシートで応募",
+ "cost_yen": null,
+ "benefit_yen": null,
+ "apply_url": "https://example.com/cp",
+ "requires_subscription": true,
+ "actionable_now": true,
+ "confidence": 0.9,
+ "exclude_reason": null,
+ "first_come": false
+}

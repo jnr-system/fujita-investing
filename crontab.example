@@ -1,0 +1,14 @@
+# otoku の cron（DESIGN.md 9章）。`crontab -e` で貼り付けて使う。
+# このマシンのタイムゾーンは Asia/Tokyo なので、時刻はJSTのまま書く。
+# 12:00・19:00 は config.yaml の select_slots と合わせる（send はこの時刻から slot_window_minutes 分のあいだだけ通常の選定をする）。
+# 多重起動は otoku 自身が data/otoku.lock で防ぐ（先の実行が終わるのを最大 lock_wait_seconds 秒待つ）。
+# 本番の実行は、重大なエラーのときだけ画面に出す（cron のメールになる）。詳細は data/logs/otoku.log と #ログ。
+OTOKU=/root/project/fujita-investing/.venv/bin/otoku
+
+*/30 * * * *  $OTOKU collect && $OTOKU send --urgent-only
+0 12,19 * * * $OTOKU send
+
+15 * * * *    $OTOKU sync
+0 9 * * *     $OTOKU remind
+0 8 * * *     $OTOKU check-sources --report
+0 8 * * 1     $OTOKU sync --weekly-report

@@ -1,0 +1,17 @@
+{
+ "kind": "refund_first",
+ "genre": "food",
+ "product": "新商品 全額キャッシュバック",
+ "organizer": "テスト株式会社",
+ "start_at": null,
+ "deadline_at": "2026-10-20T23:59:00+09:00",
+ "conditions": "先着1万名、レシート応募、1人1回",
+ "cost_yen": 298,
+ "benefit_yen": 298,
+ "apply_url": "https://example.com/cp",
+ "requires_subscription": false,
+ "actionable_now": true,
+ "confidence": 0.93,
+ "exclude_reason": null,
+ "first_come": true
+}

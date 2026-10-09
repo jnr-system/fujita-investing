@@ -1,0 +1,17 @@
+{
+ "kind": "excluded",
+ "genre": "food",
+ "product": "テスト商品",
+ "organizer": "テスト株式会社",
+ "start_at": null,
+ "deadline_at": "2026-10-20T23:59:00+09:00",
+ "conditions": "対象商品を購入してレシートで応募",
+ "cost_yen": null,
+ "benefit_yen": null,
+ "apply_url": "https://example.com/cp",
+ "requires_subscription": false,
+ "actionable_now": true,
+ "confidence": 0.9,
+ "exclude_reason": "抽選で全額返金（懸賞）",
+ "first_come": false
+}

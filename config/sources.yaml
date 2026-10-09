@@ -1,0 +1,613 @@
+# 情報源の定義（DESIGN.md 6.2 の形式）
+# フェーズ0（2026-10-09）に実際に取得して確認した結果。根拠と不採用の理由は docs/sources_review.md。
+#   enabled: true  … 採用
+#   enabled: false … 保留・未確認／取得禁止・ブロックのため不採用／Googleアラートの空欄
+# URLを確認できなかった候補（味の素・ジョーシン・高島屋・イオンなど）はここに載せず、review にだけ「未確認」として記載。
+# min_interval_minutes は DESIGN.md 6.5 の最短値（rss・json_api 30分、html_diff 360分）。
+# html_diff は一覧ページの文字（リンクの文字・画像のalt・カードの文言）だけを使い、個別ページは取得しない（2026-10-09 ユーザー判断）。
+# ゲームニュースのRSS（gamespark_news・automaton_news）は、今受け取れる無料配布を伝える記事だけを対象にする（DESIGN.md 2章「ニュース記事は除外」の例外。2026-10-09 ユーザー判断）。
+# 「1個買うと1個もらえる」系（同じ商品・別の商品の無料引換券とも）は通知の対象（2026-10-09 ユーザー判断）。
+# html_diff の link_selector（見る範囲のCSSセレクタ）と link_pattern（見るリンクのURLの正規表現）は省略可（フェーズ3で追加、2026-10-09 ユーザー確認）。
+# 「# 監視:」のコメントは収集の実装（フェーズ1・3）向けのメモ。
+
+# ============================================================ 採用
+# ---- 共通（A・B）
+# PR TIMES 新着プレスリリースRSS
+# 監視: 全件RSS（200件で約2.5時間分）。カテゴリ別・キーワード別のフィードはない
+- id: prtimes_all
+  type: rss
+  url: "https://prtimes.jp/index.rdf"
+  scope: [A, B]
+  genre_hint: [tcg, whisky, console, food, drink, daily, cvs, game]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可（Allow: /）、規約上の禁止なし、RSS 200件を確認"
+
+# ---- A トレカ
+# ポケモンカード公式 ニュース一覧
+# 監視: 記事リンク /info/<6桁>.html と pokemoncenter-online.com/news/ への外部リンク。ETagなし
+- id: pokemon_card_news
+  type: html_diff
+  url: "https://www.pokemon-card.com/info/"
+  link_pattern: '/info/\d{6}\.html|pokemoncenter-online\.com/news/'
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、JSなしで項目リンク135件"
+
+# ホビーステーション 最新ニュース（抽選販売告知）
+# 監視: 応募終了でタイトルに「※応募は終了しました」が付くので、重複判定は guid（?p=ID）で
+- id: hobbystation_news
+  type: rss
+  url: "https://www.hbst.net/category/news/feed"
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約ページなし、RSS 10件を確認"
+
+# ---- A 家電量販店・ゲーム専門店（トレカ・ゲーム機共通）
+# ゲオオンライン お知らせ（抽選販売受付のお知らせ）
+# 監視: ul#newsList の /news/<連番>。ETagなし・Cache-Control: no-store。ゲーム機の抽選が載るかは未確認
+- id: geo_news_lottery
+  type: html_diff
+  url: "https://geo-online.co.jp/news/"
+  link_pattern: '^https://geo-online\.co\.jp/news/\d+$'
+  scope: A
+  genre_hint: [tcg, console]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク7件。2026-10-09 15:42 以降こちらのUAに HTTP 403 が続くため停止（ボット対策と思われる。回避はしない）。数日後に再確認"
+
+# ---- A ウイスキー（メーカー・百貨店・量販店・酒販チェーン）
+# 三越伊勢丹オンラインストア 三越伊勢丹ウイスキーコレクション（毎月20日の抽選販売）
+# 監視: /shopping/product/<24桁>.html。毎月20日に入れ替え（月によって抽選と先着が変わる）
+- id: mistore_whisky_collection
+  type: html_diff
+  url: "https://www.mistore.jp/shopping/feature/foods_f3/whisky_festival_f"
+  link_pattern: '^https://www\.mistore\.jp/shopping/product/\d+\.html$'
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク4件。2026-10-09 15:42 以降、ページと robots.txt がタイムアウトし続けるため停止（ボット対策と思われる。回避はしない）。数日後に再確認"
+
+# 大丸松坂屋 抽選販売（オンラインストアに一覧なし → 松坂屋上野店トピックスJSON）
+# 監視: 上野店のトピックスのみ。url は相対・絶対が混在し、カテゴリ間で重複する
+- id: matsuzakaya_ueno_topics
+  type: json_api
+  url: "https://www.matsuzakaya.co.jp/ueno/topics/topics.json"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、認証なしのJSONを確認"
+
+# カクヤス 特集一覧（希少ウイスキー販売会・抽選）
+# 監視: /featured_products/<名前>
+- id: kakuyasu_featured
+  type: html_diff
+  url: "https://www.kakuyasu.co.jp/featured_products"
+  link_pattern: '^https://www\.kakuyasu\.co\.jp/featured_products/[^/?#]+/?$'
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク51件"
+
+# ---- A ウイスキー（国内蒸溜所）
+# 本坊酒造（マルス信州・マルス津貫）お知らせ
+# 監視: 「抽選」は本文（content:encoded）にだけ出ることがある
+- id: hombo_mars_news
+  type: rss
+  url: "https://www.hombo.co.jp/feed/"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、RSS 20件を確認"
+
+# ガイアフロー静岡蒸溜所 ニュース
+# 監視: 「抽選」は本文（content:encoded）にだけ出ることがある
+- id: gaiaflow_news
+  type: rss
+  url: "https://www.gaiaflow.co.jp/feed"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約ページなし、RSS 38件を確認"
+
+# 三郎丸蒸留所（若鶴酒造）NEWS
+# 監視: link に utm パラメータが付くので、重複判定は guid かクエリを除いたURLで
+- id: saburomaru_news
+  type: rss
+  url: "https://www.wakatsuru.co.jp/saburomaru/information/feed/"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約ページなし、RSS 20件を確認"
+
+# ---- A ゲーム機・限定版
+# PlayStation.Blog 日本語版 RSS
+# 監視: robots.txt に crawl-delay 5。本文全文入りで約370KB
+- id: playstation_blog_jp
+  type: rss
+  url: "https://blog.ja.playstation.com/feed/"
+  scope: A
+  genre_hint: [console]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、RSS 10件を確認"
+
+# Xbox Wire Japan RSS
+# 監視: ETag・Last-Modifiedあり
+- id: xbox_wire_jp
+  type: rss
+  url: "https://news.xbox.com/ja-jp/feed/"
+  scope: A
+  genre_hint: [console]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、RSS 10件を確認"
+
+# ---- B 食品
+# 日清食品グループ キャンペーン一覧
+# 監視: /jp/product/campaigns/<数字>/。一覧に載らないキャンペーンがある（例：たまごくじ）
+- id: nissin_campaigns
+  type: html_diff
+  url: "https://www.nissin.com/jp/product/campaigns/"
+  link_pattern: '^https://www\.nissin\.com/jp/product/campaigns/\d+/$'
+  scope: B
+  genre_hint: [food]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、JSなしで項目リンク3件"
+
+# 明治 キャンペーン一覧
+# 監視: ul.campaign-list 内の a.l-card-visual-link（リンク先は x.com・ブランドサイトなど様々）
+- id: meiji_campaign
+  type: html_diff
+  url: "https://www.meiji.co.jp/campaign/"
+  link_selector: 'ul.campaign-list a.l-card-visual-link'
+  scope: B
+  genre_hint: [food]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク12件"
+
+# 森永製菓 キャンペーン情報
+# 監視: a.campaign-list__link。公式RSS /rss/index.rdf は実施中7件のうち2件が載らないため一覧を採用
+- id: morinaga_campaign
+  type: html_diff
+  url: "https://www.morinaga.co.jp/campaign/"
+  link_selector: 'a.campaign-list__link'
+  scope: B
+  genre_hint: [food]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク7件"
+
+# カルビー キャンペーン・動画
+# 監視: section#campaign 内の ?banner=campaign のリンク（文字情報は img の alt だけ）
+- id: calbee_campaign
+  type: html_diff
+  url: "https://www.calbee.co.jp/campaign/"
+  link_selector: 'section#campaign'
+  link_pattern: '\?banner=campaign'
+  scope: B
+  genre_hint: [food]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、JSなしで項目リンク2件"
+
+# 山崎製パン キャンペーン
+# 監視: div#campaign .main 内の a（季節の別ドメインあり。ナビにも同じリンクがある）
+- id: yamazaki_campaign
+  type: html_diff
+  url: "https://www.yamazakipan.co.jp/campaign/"
+  link_selector: 'div#campaign .main'
+  scope: B
+  genre_hint: [food]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク2件"
+
+# ---- B 飲料
+# キリン 公式キャンペーン一覧
+# 監視: JSONP（campaign(...) で包まれている）。各要素の link。終了分（2021年〜）も含む・約317KB・Last-Modifiedあり
+- id: kirin_campaign
+  type: json_api
+  url: "https://www.kirin.co.jp/campaign/json/campaign.js"
+  scope: B
+  genre_hint: [drink]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、認証なしのJSONを確認"
+
+# アサヒビール 公式キャンペーン一覧（候補「アサヒ（アサヒビール／アサヒ飲料）」の1/2）
+# 監視: 「詳細を見る」の a。個別ページの一部は robots.txt で Disallow（/web-service/）だが、個別ページは取得しない
+- id: asahibeer_campaign
+  type: html_diff
+  url: "https://www.asahibeer.co.jp/campaign/"
+  link_pattern: 'asahibeer-cp\.jp/|/park/cp/|/cp/|clearasahi-cp\.jp'
+  scope: B
+  genre_hint: [drink]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク12件"
+
+# アサヒ飲料 公式キャンペーン一覧（候補「アサヒ（アサヒビール／アサヒ飲料）」の2/2）
+# 監視: /entertainment/campaign/...。HTMLコメント内に終了分が約95件あるので、コメントを除いて比較する
+- id: asahiinryo_campaign
+  type: html_diff
+  url: "https://www.asahiinryo.co.jp/campaign/"
+  link_pattern: '/entertainment/campaign/'
+  scope: B
+  genre_hint: [drink]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク8件"
+
+# 伊藤園 公式キャンペーン一覧
+# 監視: 「実施中」欄の a（外部の sslcamp.jp など）。ETag・Last-Modifiedあり
+- id: itoen_campaign
+  type: html_diff
+  url: "https://www.itoen.jp/campaign/"
+  link_selector: 'div.c-campaignEntries a.item__link'
+  scope: B
+  genre_hint: [drink]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク1件"
+
+# ---- B 日用品
+# ライオン キャンペーン一覧（Lidea）
+# 監視: /campaign/<slug>/index（?from= は除く）。HTMLコメント内に終了分がある
+- id: lion_lidea_campaign
+  type: html_diff
+  url: "https://lidea.today/all-campaign.php"
+  link_pattern: '^https://lidea\.today/campaign/[^/]+/index'
+  scope: B
+  genre_hint: [daily]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク2件"
+
+# ユニ・チャーム キャンペーン
+# 監視: ul.uc-mod-items 内の li.uc-item > a（URLの形はまちまち）
+- id: unicharm_campaign
+  type: html_diff
+  url: "https://www.unicharm.co.jp/ja/campaign.html"
+  link_selector: 'ul.uc-mod-items li.uc-item > a'
+  scope: B
+  genre_hint: [daily]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク4件"
+
+# ---- B コンビニ
+# セブン‐イレブン セール・キャンペーン一覧
+# 監視: /cmp/<名前>.html
+- id: sej_campaign
+  type: html_diff
+  url: "https://www.sej.co.jp/cmp/"
+  link_pattern: '^https://www\.sej\.co\.jp/cmp/(?!index\.html|snscmppdf\.html)[a-z0-9_]+\.html$'
+  scope: B
+  genre_hint: [cvs]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、JSなしで項目リンク39件"
+
+# ファミリーマート キャンペーン一覧
+# 監視: /campaign/spot/<名前>.html。常設の 2023_1buy1-receipt_cp.html は毎週同じURLのまま回が替わる（仕様8.1では2回目以降を拾えない）
+- id: familymart_campaign
+  type: html_diff
+  url: "https://www.family.co.jp/campaign.html"
+  link_pattern: '^https://www\.family\.co\.jp/campaign/spot/[^/]+\.html$'
+  scope: B
+  genre_hint: [cvs]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約上の禁止なし、JSなしで項目リンク33件"
+
+# ローソン お得なセール情報（もらえるキャンペーン一覧）
+# 監視: /recommend/sale/detail/<数字>_<数字>.html だけを見る（ナビの /lab/campaign/ は除く）
+- id: lawson_sale
+  type: html_diff
+  url: "https://www.lawson.co.jp/recommend/sale/index.html"
+  link_pattern: '^https://www\.lawson\.co\.jp/recommend/sale/detail/\d+_\d+\.html$'
+  scope: B
+  genre_hint: [cvs]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、JSなしで項目リンク28件"
+
+# ---- B ゲーム（無料配布）
+# GamerPower 無料配布RSS
+# 監視: 英語。title は「<タイトル> (<ストア>) Giveaway」。DLC・プレイテストキー・スマホも混ざる。Last-Modifiedあり
+- id: gamerpower_rss
+  type: rss
+  url: "https://www.gamerpower.com/rss/giveaways"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txtは許可。利用規約の Acceptable Use Policy に「自動のリクエスト・問い合わせの禁止」があるが、サイト自身がRSSを提供しボットでの利用も案内していることから、RSSの定期取得は想定内とみなしてユーザー判断で採用（2026-10-09）"
+
+# Game*Spark 新着記事RSS
+# 監視: 約14.5時間で50件。無料配布は題名に「【◯円→0円】」「無料配布」。記事リンクは http:// で書かれている
+- id: gamespark_news
+  type: rss
+  url: "https://www.gamespark.jp/rss20/index.rdf"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、RSS 50件を確認"
+
+# AUTOMATON 新着記事RSS
+# 監視: 約2日で60件。無料体験版・基本プレイ無料の記事も多いので、AI判定で落とす
+- id: automaton_news
+  type: rss
+  url: "https://automaton-media.com/feed/"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txt許可、規約上の禁止なし、RSS 60件を確認"
+
+# ============================================================ 保留・未確認（URLは取得して確認済み。判断待ち・確認しきれていないため無効）
+# ワンピースカードゲーム公式 ニュース（お知らせ一覧）
+- id: onepiece_cardgame_news
+  type: json_api
+  url: "https://www.onepiece-cardgame.com/common/templates/api/article_list.php?start=0&limit=10&data=%7B%22category%22%3A%22INFORMATION%22%2C%22subcategory%22%3A%5B%22%22%5D%2C%22is_history%22%3Atrue%7D"
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "2026-10-09 未確認: 取得の手段は確認できた（公開JSON・robots制限なし・規約なし）。ただし、ニュースに抽選の告知が載るかを確かめられなかった（直近10件に抽選なし。アクセス上限とWeb検索の上限に達した）"
+
+# サントリー 公式キャンペーン一覧
+- id: suntory_softdrink_campaign
+  type: html_diff
+  url: "https://www.suntory.co.jp/softdrink/"
+  scope: B
+  genre_hint: [drink]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 未確認: 本来のキャンペーン一覧 https://www.suntory.co.jp/softdrink/campaign/ は、ページ内のリンクとして見えただけで未取得（ホストのアクセス上限5回に達した）。確認できたのはソフトドリンクトップのキャンペーン枠（6件）だけ"
+
+# ============================================================ 不採用（robots.txt・規約で禁止、またはこちらのUAをブロック）
+# ポケモンセンターオンライン お知らせ（抽選告知）
+- id: pokemoncenter_online_news
+  type: html_diff
+  url: "https://www.pokemoncenter-online.com/"
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: 利用規約 第6条⑰⑱でクローリング・スクレイピング・自動手段による情報取得を明示的に禁止"
+
+# P&G マイレピ お得なキャンペーン
+- id: pg_myrepi_campaigns
+  type: html_diff
+  url: "https://www.myrepi.com/campaigns/"
+  scope: B
+  genre_hint: [daily]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: P&Gの利用規約が「スクレイピング」や「ロボット、スパイダー、その他の自動化された手段」でのコピーを明示的に禁じている"
+
+# コカ・コーラ（日本コカ・コーラ） 公式キャンペーン一覧
+- id: cocacola_jp_campaign
+  type: html_diff
+  url: "https://www.coca-cola.com/jp/ja/brands/coca-cola/campaign"
+  scope: B
+  genre_hint: [drink]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: 利用規約がロボット・スクレイピングによるアクセスや取得を明記して禁止している"
+
+# チャンスイット 懸賞情報（全員・先着）
+- id: chanceit_present
+  type: html_diff
+  url: "https://www.chance.com/"
+  scope: B
+  genre_hint: [food, drink, daily, cvs]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: 規約で「提供されているインターフェイス以外の手段」でのアクセスと、承諾のない情報収集を禁止しているため"
+
+# 抽選まとめサイト: トレゲト（旧カード抽選まとめ, cardchusen.com）
+- id: cardchusen
+  type: html_diff
+  url: "https://cardchusen.com/robots.txt"
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: robots.txt で、利用規約第5条が機械的な取得・蓄積を禁じていると明記"
+
+# Steam 期間限定無料配布（Free to Keep）
+- id: steam_free_to_keep
+  type: html_diff
+  url: "https://store.steampowered.com/search/?maxprice=free&specials=1"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: Steam 利用規約 4.C が、スクリプト・ボット等で Steam のコンテンツやサービスとやり取りすることを禁じている（例示に限定されない書き方）"
+
+# 任天堂 トピックス（nintendo.com/jp/topics）RSS
+- id: nintendo_jp_topics
+  type: rss
+  url: "https://www.nintendo.com/jp/topics/c/feed/rss/"
+  scope: A
+  genre_hint: [console]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "2026-10-09 不採用: robots.txt のコメントで、コンテンツの「web scraping, machine learning, or any form of text or data mining by any means」を書面の許可なく禁止すると宣言している（規則自体は Allow: / だが、禁止の意思表示として不採用にした）"
+
+# ビックカメラ.com 抽選販売ページ（トレカ・ゲーム機）
+- id: biccamera_lottery
+  type: html_diff
+  url: "https://www.biccamera.com/"
+  scope: A
+  genre_hint: [tcg, console]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: トップが今回のUAに403（アクセス遮断）を返すうえ、抽選の一覧ページがない"
+
+# あみあみ 抽選販売告知
+- id: amiami_lottery
+  type: html_diff
+  url: "https://www.amiami.jp/"
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: トップページ https://www.amiami.jp/ が Cloudflare の 403「Sorry, you have been blocked」で、こちらの UA をブロック"
+
+# ノジマオンライン 抽選販売
+- id: nojima_lottery
+  type: html_diff
+  url: "https://online.nojima.co.jp/"
+  scope: A
+  genre_hint: [tcg, console]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: トップが今回のUAに Akamai のボット判定チャレンジ（JS必須の検証画面）を返す＝ブロック"
+
+# ニチレイフーズ キャンペーン一覧
+- id: nichirei_campaign
+  type: html_diff
+  url: "https://www.nichireifoods.co.jp/campaign/"
+  scope: B
+  genre_hint: [food]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: robots.txt と /campaign/ の両方が当方のUAに403（AWS ELB）を返す＝ブロックされているため"
+
+# 嘉之助蒸溜所 NEWS
+- id: kanosuke_news
+  type: html_diff
+  url: "https://kanosuke.com/news/"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 360
+  enabled: false
+  verified: "2026-10-09 不採用: ニュース一覧が 429（本文 local_rate_limited、Retry-After: 60）を返した。2回目のリクエスト（リダイレクト先）で発生したため、規則4により不採用"
+
+# Epic Games Store 無料ゲーム（freeGamesPromotions JSON）
+- id: epic_free_games
+  type: json_api
+  url: "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ja&country=JP&allowCountries=JP"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "2026-10-09 不採用: 認証なしのJSONは取れて robots.txt もないが、サイト利用規約がこちらのUAに403で読めず、検索結果の抜粋（未確認）に自動の手段で監視・分析などのためにデータを抽出すること（scraping）を禁じる条項がある可能性があるため、ユーザー判断で不採用（2026-10-09）"
+
+# GamerPower 公開API（ゲームの無料配布の一覧）
+- id: gamerpower_api
+  type: json_api
+  url: "https://www.gamerpower.com/api-read"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "2026-10-09 不採用: robots.txt が全UAに対して /api/* を Disallow しているため（説明ページはボットでの利用を案内しているが、robots.txt に従う）"
+
+# ============================================================ Googleアラート（ユーザーが手動で作成し、RSSのURLを貼って enabled: true にする）
+# キーワード: 全額返金キャンペーン
+- id: google_alert_zengaku_henkin
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: B
+  genre_hint: [food, drink, daily, cvs]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 全額キャッシュバック 先着
+- id: google_alert_cashback_senchaku
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: B
+  genre_hint: [food, drink, daily, cvs]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 無料引換券 コンビニ
+- id: google_alert_muryo_hikikae_cvs
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: B
+  genre_hint: [cvs]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 無料サンプル 先着
+- id: google_alert_muryo_sample
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: B
+  genre_hint: [food, drink, daily]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 抽選販売 ポケモンカード
+- id: google_alert_lottery_pokeca
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: A
+  genre_hint: [tcg]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 抽選販売 ウイスキー
+- id: google_alert_lottery_whisky
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 抽選販売 ゲーム機 本体
+- id: google_alert_lottery_console
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: A
+  genre_hint: [console]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 限定モデル 抽選販売 ゲーム
+- id: google_alert_lottery_limited_game
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: A
+  genre_hint: [console]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"
+
+# キーワード: 無料配布 ゲーム 期間限定
+- id: google_alert_free_game
+  type: rss
+  url: "<Googleアラートで作成したRSSのURLを貼る>"
+  scope: B
+  genre_hint: [game]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "未設定（ユーザーが手動で作成する）"

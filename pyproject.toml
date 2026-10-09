@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "otoku"
+version = "0.1.0"
+description = "個人用のお得情報収集システム（限定品の抽選と100%還元キャンペーンを厳選してDiscordに通知）"
+requires-python = ">=3.11"
+dependencies = [
+  "httpx",
+  "feedparser",
+  "beautifulsoup4",
+  "pyyaml",
+  "pydantic>=2",
+  "google-genai",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+otoku = "otoku.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

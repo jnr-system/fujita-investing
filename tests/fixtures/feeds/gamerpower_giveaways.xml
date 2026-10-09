@@ -1,0 +1,43 @@
+
+<rss version='2.0' xmlns:media='http://search.yahoo.com/mrss/' xmlns:atom='http://www.w3.org/2005/Atom'>
+<channel>
+<title>GamerPower Giveaways</title>
+<atom:link href='https://www.gamerpower.com/rss/giveaways' rel='self' type='application/rss+xml'/>
+<description>Find, Track and collect the best giveaways in gaming!</description>
+<link>https://www.gamerpower.com</link>
+<image>
+<title>GamerPower Giveaways</title>
+<url>https://www.gamerpower.com/favicon/android-chrome-192x192.png</url>
+<link>https://www.gamerpower.com</link>
+</image>
+<item><title>Pony Island (Steam) Giveaway</title>
+<description>Yes, this is real! You can grab Pony Island for free on Steam! Pony Island is a suspenseful puzzle game disguised as something much more interesting. Definitely worth checking out
+</description>
+<pubDate>Thu, 08 Oct 26 17:49:15 +0000</pubDate>
+<link>https://www.gamerpower.com/pony-island-steam-giveaway</link>
+<guid>http://www.gamerpower.com/pony-island-steam-giveaway</guid>
+<atom:link href='https://www.gamerpower.com/pony-island-steam-giveaway' rel='self' type='application/rss+xml'/>
+<media:content url='https://www.gamerpower.com/offers/1b/6ac7d79b50528.jpg' type='image/jpeg' />
+</item>
+<item><title>The Big Con (Mobile) Giveaway</title>
+<description>The Big Con (Mobile version) is free until October 15 on the Epic Games Store App for iPhone, iPad, and Android.
+
+Note: May not be available in all regions
+</description>
+<pubDate>Thu, 08 Oct 26 15:12:47 +0000</pubDate>
+<link>https://www.gamerpower.com/the-big-con-mobile-giveaway</link>
+<guid>http://www.gamerpower.com/the-big-con-mobile-giveaway</guid>
+<atom:link href='https://www.gamerpower.com/the-big-con-mobile-giveaway' rel='self' type='application/rss+xml'/>
+<media:content url='https://www.gamerpower.com/offers/1b/6ac7b2efb9d34.jpg' type='image/jpeg' />
+</item>
+<item><title>TerraScape (Epic Games) Giveaway</title>
+<description>Win some relaxation with this giveaway! Score TerraScape for free via Epic Games Store! TerraScape is a fun 3d cozy city builder with relaxing puzzles and randomly generated maps. Don´t miss it!
+</description>
+<pubDate>Thu, 08 Oct 26 15:07:19 +0000</pubDate>
+<link>https://www.gamerpower.com/terrascape-epic-games-giveaway</link>
+<guid>http://www.gamerpower.com/terrascape-epic-games-giveaway</guid>
+<atom:link href='https://www.gamerpower.com/terrascape-epic-games-giveaway' rel='self' type='application/rss+xml'/>
+<media:content url='https://www.gamerpower.com/offers/1b/6ac7b1a7b298e.jpg' type='image/jpeg' />
+</item>
+</channel>
+</rss>

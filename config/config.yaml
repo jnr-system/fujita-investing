@@ -1,0 +1,103 @@
+# お得情報収集システムの設定（DESIGN.md 10章）。数値・時刻・キーワードはここで変える。
+
+daily_cap: 5          # 2026-10-09 ユーザー判断で 3 → 5（少なすぎると面白くないため）
+score_threshold: 50   # 2026-10-09 ユーザー判断で 60 → 50（先着でない無料引換も届くように）
+min_confidence: 0.8
+quiet_hours: {start: "23:00", end: "07:00"}
+select_slots: ["12:00", "19:00"]
+
+gemini:
+  # 2026-10-09 に公式ドキュメント（ai.google.dev/gemini-api/docs/models）で確認した、
+  # Flash系で最新の安定版のうち安価なもの。より安い候補は gemini-3.1-flash-lite。
+  model: "gemini-3.5-flash-lite"
+  temperature: 0
+  max_body_chars: 4000
+  retry_on_invalid: 1        # 応答がスキーマに合わないときの再試行回数（12章）
+  timeout_seconds: 60
+
+genres_enabled: [tcg, whisky, console, food, drink, daily, cvs, game]
+
+# 8.6 のスコア：base + genre + urgency + benefit_bonus + source_weight
+weights:
+  base: {refund_first: 60, refund_all: 55, free_item: 50, free_game: 45, lottery: 50}
+  genre: {tcg: 15, whisky: 15, console: 10}   # ここにないジャンルは 0
+  urgency:                                    # 締切までの時間。短い順に見て、最初に当てはまる点数
+    - {within_hours: 24, points: 15}
+    - {within_hours: 72, points: 5}
+  first_come: 15                              # 先着は常にこの点数（締切の点数と比べて大きいほうだけ）
+  benefit_bonus:                              # 大きい順に見て、最初に当てはまる点数。不明は 0
+    - {min_yen: 5000, points: 10}
+    - {min_yen: 1000, points: 5}
+  source_weight: {min: -10, max: 10, step: 5} # 情報源ごとの重み（フィードバックで調整、8.9）
+
+# 8.7 送信選定
+send:
+  urgent_within_hours: 24     # 締切がこの時間以内なら緊急（先着も緊急）
+  slot_window_minutes: 30     # select_slots の時刻からこの分数のあいだだけ通常の選定をする（それ以外は緊急のみ）
+
+# 8.9 フィードバックと調整、8.10 締切リマインド、12章 稼働確認
+feedback:
+  window: 30                  # 情報源ごとに直近この件数の通知で判定する
+  ratio: 0.5                  # ❌（✅）の割合がこれを超えたら重みを -step（+step）
+  min_notifications: 5        # 通知がこの件数未満の情報源は調整しない（2026-10-09 ユーザー判断）
+  lookback_days: 14           # sync でリアクションを読みに行く、送信済みメッセージの期間
+remind:
+  before_hours: 24            # 締切までこの時間以内になったら、⏰ のものを1回だけ知らせる
+report:
+  weekly_days: 7              # 週次報告で集計する日数
+
+lock_wait_seconds: 600        # 別の otoku の実行中に起動したとき、終わるのを待つ最長の秒数（9章）
+
+# 8.2 のルールフィルタ。大文字・小文字、全角・半角は区別しない。
+keywords:
+  # タイトルか本文に1つも含まないものは捨てる
+  include:
+    - 抽選販売
+    - 抽選
+    - 数量限定販売
+    - 全額返金
+    - 全額キャッシュバック
+    - 実質無料
+    - 実質0円
+    - →0円
+    - 無料引換
+    - 無料配布
+    - プレゼント
+    - サンプル
+    - 先着
+    - もらえる
+    - giveaway
+  # タイトルに含むものは捨てる（本文には「受付終了：10月15日」のような書き方が多いので見ない）
+  exclude:
+    - 当選発表
+    - 当選者発表
+    - 結果発表
+    - 抽選結果
+    - 受付終了
+    - 応募終了
+    - 販売終了
+    - 終了しました
+    - 満足保証
+    - 返金保証
+    - 定期コース
+    - 定期購入
+    - 定期便
+    - 基本プレイ無料
+    - フリーウィークエンド
+    - 無料体験
+    - 値引券          # 実質0円ではない（2026-10-09 追加）
+    - 割引券
+    - 円引き
+
+# 6.5 取得のマナー、12章 エラー処理
+collect:
+  timeout_seconds: 20
+  host_spacing_seconds: 2     # 同じホストへのリクエストの間隔
+  retry: 1                    # 取得失敗時の再試行回数
+  fail_pause_after: 3         # この回数続けて失敗したら一時停止
+  pause_hours: 24
+  interval_tolerance_seconds: 60   # 最短間隔の判定の余裕（cron の起動時刻の1秒未満のずれで丸ごと飛ばさないため）
+
+discord:
+  max_message_chars: 2000     # 1メッセージの上限（#ログは1候補1行で、この長さまでまとめて送る）
+  max_429_retries: 5

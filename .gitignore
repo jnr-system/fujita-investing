@@ -1,0 +1,14 @@
+# 秘密情報
+.env
+
+# 実行時のデータ（DB・ログ・ロック・未送信のメッセージ）
+data/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/

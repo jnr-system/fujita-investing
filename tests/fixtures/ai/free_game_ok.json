@@ -1,0 +1,17 @@
+{
+ "kind": "free_game",
+ "genre": "game",
+ "product": "Out of Sight",
+ "organizer": "テスト株式会社",
+ "start_at": null,
+ "deadline_at": "2026-10-15",
+ "conditions": "対象商品を購入してレシートで応募",
+ "cost_yen": 0,
+ "benefit_yen": 3350,
+ "apply_url": "https://example.com/cp",
+ "requires_subscription": false,
+ "actionable_now": true,
+ "confidence": 0.9,
+ "exclude_reason": null,
+ "first_come": false
+}

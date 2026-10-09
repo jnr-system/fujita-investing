@@ -1,0 +1,17 @@
+{
+ "kind": "lottery",
+ "genre": "console",
+ "product": "限定モデル（予告）",
+ "organizer": "テスト株式会社",
+ "start_at": null,
+ "deadline_at": null,
+ "conditions": "対象商品を購入してレシートで応募",
+ "cost_yen": null,
+ "benefit_yen": null,
+ "apply_url": "https://example.com/cp",
+ "requires_subscription": false,
+ "actionable_now": false,
+ "confidence": 0.85,
+ "exclude_reason": null,
+ "first_come": false
+}

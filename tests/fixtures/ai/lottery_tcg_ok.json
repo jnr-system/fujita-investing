@@ -1,0 +1,17 @@
+{
+ "kind": "lottery",
+ "genre": "tcg",
+ "product": "ポケモンカードゲーム 拡張パック",
+ "organizer": "テスト株式会社",
+ "start_at": null,
+ "deadline_at": "2026-10-12T16:59:00+09:00",
+ "conditions": "会員登録が必要、1人1回",
+ "cost_yen": 5400,
+ "benefit_yen": null,
+ "apply_url": "https://example.com/cp",
+ "requires_subscription": false,
+ "actionable_now": true,
+ "confidence": 0.95,
+ "exclude_reason": null,
+ "first_come": false
+}
