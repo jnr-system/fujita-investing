@@ -359,6 +359,38 @@
   enabled: true
   verified: "2026-10-09 robots.txt許可、規約上の禁止なし、RSS 60件を確認"
 
+# ============================================================ 追加（2026-10-09 夕方の追加検証。docs/sources_review.md の「追加検証」）
+# オーケー お知らせRSS（「国産洋酒の抽選販売実施について」が月1〜2回。応募は会員アプリ限定、一部は店舗限定）
+- id: ok_corporation_rss
+  type: rss
+  url: "http://ok-corporation.jp/rss2.xml"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、規約ページなし、RSS 30件を確認（うち抽選販売の告知2件）"
+
+# 東急百貨店オンラインストア ウイスキー抽選販売のご案内（抽選のたびに応募フォームのリンク f=<番号> が変わる前提）
+- id: tokyu_online_whisky_lottery
+  type: html_diff
+  url: "https://online.tokyu-dept.co.jp/sp/?fkey=lottery_sale"
+  link_pattern: '^https://krs\.tokyu-dept\.co\.jp/m\?f=\d+'
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 360
+  enabled: true
+  verified: "2026-10-09 robots.txtなし（404）＝制限なし、会員規約に機械取得の禁止なし、JSなしで応募フォームのリンク1件（前回分）"
+
+# リカーショップキナセ（水戸）ブログRSS（店頭での国産ウイスキー抽選販売会、年4〜6回）
+- id: kinase_blog_rss
+  type: rss
+  url: "https://liquor-shop-kinase.co.jp/feed/"
+  scope: A
+  genre_hint: [whisky]
+  min_interval_minutes: 30
+  enabled: false
+  verified: "2026-10-09 robots.txt許可、規約ページなし、RSS 10件を確認。取得の条件は満たすが、水戸の店頭で応募する地域限定の抽選なので、使うかはユーザー判断待ち"
+
 # ============================================================ 保留・未確認（URLは取得して確認済み。判断待ち・確認しきれていないため無効）
 # ワンピースカードゲーム公式 ニュース（お知らせ一覧）
 - id: onepiece_cardgame_news
